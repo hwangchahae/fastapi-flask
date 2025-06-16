@@ -1,4 +1,3 @@
-
 # 요청 / 응답 모델(데이터 타입) 정의
 from pydantic import BaseModel
 
@@ -36,6 +35,9 @@ class CartItem(BaseModel):
     product_id: int
     quantity: int
 
+class CartItemOut(BaseModel):
+    quantity: int
+
 class OrderRequest(BaseModel):    
     user_id: int
 
@@ -44,5 +46,6 @@ class OrderOut(BaseModel):
     user_id: int    
     product_id: int
     quantity: int
+    product: ProductOut
     class Config:   # 객체로 리턴할때
         from_attributes = True    
