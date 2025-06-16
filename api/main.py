@@ -47,7 +47,9 @@ from fastapi import FastAPI, Request
 @app.post('/api/register')
 def register_user(user: RegisterRequest, db:Session=Depends(get_db)):
     # 같은 사용자가 있는지 조회
-    existing_user =  db.query(User).filter(User.username == user.username).first()
+    existing_user =  db.query(User) \
+        .filter(User.username == user.username or User.email == user.email) \
+        .first()
     # 같은 사용자가 있으면  400에러로 응답
     if existing_user:
         raise HTTPException(status_code=400, detail="이미 존재하는 사용자입니다.")
@@ -69,7 +71,7 @@ def login(user:UserCreate, db:Session=Depends(get_db)):
     # 사용자 테이블에서 입력한 이름과 패스워드가 있는지 조회
     print(user)
     found =  db.query(User) \
-        .filter(User.username == user.username, User.password == user.password) \
+        .filter(User.username == user.username , User.password == user.password) \
         .first()
     
     if not found:
@@ -148,6 +150,15 @@ def place_order(order: OrderRequest, db:Session=Depends(get_db)):
 def get_orders(user_id:int = Query(...),db:Session=Depends(get_db)):
     orders = db.query(Order).filter(Order.user_id == user_id).all()
     return orders
+
+
+# 상품 상세조회 
+@app.get('/api/products/{product_id}', response_model=ProductOut)
+def get_product(product_id: int, db: Session = Depends(get_db)):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="상품을 찾을 수 없습니다.")
+    return product
 
 # 정적 HTML 파일 서빙
 # FAST api 방식
